@@ -1,0 +1,96 @@
+http://localhost:8080/const fs = require('fs');
+const path = require('path');
+
+fs.mkdirSync('web/src/router', { recursive: true });
+fs.mkdirSync('web/src/api', { recursive: true });
+
+const routerCode = `import { createRouter, createWebHistory } from 'vue-router'
+import Layout from '../views/Layout.vue'
+
+const routes = [
+  {
+    path: '/',
+    component: Layout,
+    redirect: '/dashboard',
+    children: [
+      { path: 'dashboard', name: 'Dashboard', component: () => import('../views/Dashboard.vue'), meta: { title: '看板' } },
+      { path: 'daily', name: 'DailyReport', component: () => import('../views/DailyReport.vue'), meta: { title: '日报表' } },
+      { path: 'weekly', name: 'WeeklyReport', component: () => import('../views/WeeklyReport.vue'), meta: { title: '周报表' } },
+      { path: 'monthly', name: 'MonthlyReport', component: () => import('../views/MonthlyReport.vue'), meta: { title: '月报表' } },
+      { path: 'projects', name: 'Projects', component: () => import('../views/Projects.vue'), meta: { title: '项目管理' } },
+      { path: 'filters', name: 'Filters', component: () => import('../views/Filters.vue'), meta: { title: '过滤规则' } },
+      { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue'), meta: { title: '设置' } },
+    ],
+  },
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+})
+
+export default router
+`;
+
+const apiCode = `import axios from 'axios'
+
+const http = axios.create({ baseURL: '/api', timeout: 30000 })
+
+http.interceptors.response.use(
+  res => res,
+  err => { return Promise.reject(err) }
+)
+
+// Projects
+export const getProjects = () => http.get('/projects')
+export const createProject = (data) => http.post('/projects', data)
+export const updateProject = (id, data) => http.put('/projects/' + id, data)
+export const deleteProject = (id) => http.delete('/projects/' + id)
+
+// Sync Logs
+export const getSyncLogs = (params) => http.get('/sync-logs', { params })
+
+// Reports
+export const getDailyReports = (params) => http.get('/reports/daily', { params })
+export const getWeeklyReports = (params) => http.get('/reports/weekly', { params })
+export const getMonthlyReports = (params) => http.get('/reports/monthly', { params })
+export const generateDailyReport = (date) => http.post('/reports/daily/generate', { date })
+export const generateWeeklyReport = (start, end) => http.post('/reports/weekly/generate', { week_start: start, week_end: end })
+export const generateMonthlyReport = (month) => http.post('/reports/monthly/generate', { year_month: month })
+
+// Filters
+export const getFilters = () => http.get('/filters')
+export const createFilter = (data) => http.post('/filters', data)
+export const updateFilter = (id, data) => http.put('/filters/' + id, data)
+export const deleteFilter = (id) => http.delete('/filters/' + id)
+
+// Dashboard
+export const getSummary = () => http.get('/dashboard/summary')
+export const getTrends = (hours) => http.get('/dashboard/trends', { params: { hours } })
+export const getTopContributors = (hours) => http.get('/dashboard/top-contributors', { params: { hours } })
+export const getProjectDistribution = () => http.get('/dashboard/project-distribution')
+export const getSyncStatus = () => http.get('/dashboard/sync-status')
+
+// Tasks
+export const triggerSync = () => http.post('/tasks/sync')
+export const triggerDailyReport = () => http.post('/tasks/report/daily')
+export const searchGitLabProjects = (keyword) => http.get('/tasks/gitlab/search', { params: { keyword } })
+export const addProjectFromGitLab = (data) => http.post('/tasks/gitlab/add', data)
+
+export default http
+`;
+
+fs.writeFileSync('web/src/router/index.js', routerCode, 'utf-8');
+console.log('Created: web/src/router/index.js');
+
+fs.writeFileSync('web/src/api/index.js', apiCode, 'utf-8');
+console.log('Created: web/src/api/index.js');
+
+// Verify
+for (const p of ['web/src/router/index.js', 'web/src/api/index.js']) {
+  if (fs.existsSync(p)) {
+    console.log(`  ${p}: ${fs.statSync(p).size} bytes OK`);
+  } else {
+    console.log(`  ${p}: MISSING!`);
+  }
+}

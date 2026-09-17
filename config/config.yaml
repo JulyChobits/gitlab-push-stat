@@ -1,0 +1,233 @@
+server:
+  port: 8080
+  mode: release  # debug or release
+
+gitlab:
+  url: "http://172.16.11.100/"   # GitLab 服务器地址
+  token: "" # Personal Access Token
+  api_version: "v4"
+
+database:
+  path: "./data/gitlab-stat.db"
+
+schedule:
+  # 数据同步间隔（每30分钟同步最新提交）
+  sync: "*/30 * * * *"
+  # 每日报表生成时间（凌晨2点）
+  daily: "0 2 * * *"
+  # 每周报表生成时间（周一凌晨3点）
+  weekly: "0 3 * * 1"
+  # 每月报表生成时间（每月1号凌晨4点）
+  monthly: "0 4 1 * *"
+
+# AI审核配置（在日报表生成后自动触发）
+ai:
+  enabled: true                       # 是否启用AI审核
+  base_url: "http://172.16.131.100:8088/v1"  # OpenAI兼容API地址
+  api_key: ""  # API Key
+  model: "qwen3.7-max"                # 模型名称
+  max_tokens: 4096                    # 最大输出token数
+  temperature: 0.3                    # 温度参数（0-1，越低越确定性）
+  timeout: 120                        # 请求超时时间（秒）
+
+filter:
+  # 排除的文件路径（正则表达式）
+  exclude_paths:
+    - "vendor/.*"
+    - "node_modules/.*"
+    - "dist/.*"
+    - "build/.*"
+    - "\\.git/.*"
+    - "coverage/.*"
+    - "__pycache__/.*"
+    - "\\.venv/.*"
+    - "target/.*"
+    - "\\.next/.*"
+    - "\\.nuxt/.*"
+
+    # 版本控制与 IDE
+    - "\\.svn/.*"
+    - "\\.hg/.*"
+    - "\\.idea/.*"
+    - "\\.vscode/.*"
+    - "\\.vs/.*"
+
+    # 语言特定构建产物 / 缓存
+    - "__pypackages__/.*"
+    - "\\.gradle/.*"
+    - "obj/.*"
+    - "\\.dart_tool/.*"
+    - "\\.pnp/.*"
+    - "\\.yarn/.*"
+    - "\\.cargo/.*"
+    - "\\.m2/.*"
+
+    # 测试与覆盖率（按需保留或删除）
+    - "test/.*"
+    - "tests/.*"
+    - "spec/.*"
+    - "__tests__/.*"
+    - "\\.nyc_output/.*"
+
+    # 框架特定输出
+    - "\\.docusaurus/.*"
+    - "\\.angular/.*"
+    - "\\.svelte-kit/.*"
+    - "\\.output/.*"
+
+    # 文档与示例（按需保留或删除）
+    - "docs/.*"
+    - "examples/.*"
+    - "samples/.*"
+
+  # 排除的文件扩展名
+  exclude_extensions:
+    - ".min.js"
+    - ".min.css"
+    - ".map"
+    - ".lock"
+    - ".svg"
+    - ".png"
+    - ".jpg"
+    - ".jpeg"
+    - ".gif"
+    - ".ico"
+    - ".woff"
+    - ".woff2"
+    - ".ttf"
+    - ".eot"
+
+    # 编译产物与字节码
+    - ".pyc"
+    - ".pyo"
+    - ".class"
+    - ".o"
+    - ".obj"
+    - ".dll"
+    - ".so"
+    - ".exe"
+
+    # 日志与临时文件
+    - ".log"
+    - ".tmp"
+    - ".temp"
+    - ".cache"
+    - ".bak"
+
+    # 数据库与数据文件
+    - ".sqlite"
+    - ".db"
+    - ".mdb"
+
+    # 文档与表格
+    - ".md"
+    - ".txt"
+    - ".pdf"
+    - ".doc"
+    - ".docx"
+    - ".xls"
+    - ".xlsx"
+    - ".csv"
+
+    # 字体与媒体
+    - ".mp4"
+    - ".mp3"
+    - ".wav"
+    - ".avi"
+    - ".mov"
+
+    # 压缩包
+    - ".zip"
+    - ".tar"
+    - ".gz"
+    - ".rar"
+    - ".7z"
+
+    # 专业领域文件（按需保留或删除）
+    - ".ipynb"
+    - ".rmd"
+
+  # 排除的文件名（精确匹配）
+  exclude_filenames:
+    - "package-lock.json"
+    - "yarn.lock"
+    - "pnpm-lock.yaml"
+    - "go.sum"
+    - "composer.lock"
+    - "Gemfile.lock"
+    - "Pipfile.lock"
+    - "poetry.lock"
+    - "README.md"
+    - "readme.md"
+
+    # 编译器 / 构建工具配置
+    - "tsconfig.json"
+    - "jsconfig.json"
+    - "webpack.config.js"
+    - "rollup.config.js"
+    - "vite.config.js"
+    - "babel.config.js"
+
+    # 代码风格与 lint 配置
+    - ".eslintrc"
+    - ".eslintrc.js"
+    - ".eslintrc.cjs"
+    - ".eslintrc.json"
+    - ".prettierrc"
+    - ".prettierrc.js"
+    - ".prettierrc.json"
+    - ".stylelintrc"
+    - ".editorconfig"
+
+    # Git 相关配置
+    - ".gitignore"
+    - ".gitattributes"
+    - ".gitmodules"
+
+    # 容器化与构建脚本
+    - "Dockerfile"
+    - "docker-compose.yml"
+    - ".dockerignore"
+    - "Makefile"
+    - "CMakeLists.txt"
+
+    # 项目元文档
+    - "LICENSE"
+    - "README.md"
+    - "CHANGELOG.md"
+    - "CONTRIBUTING.md"
+
+    # 环境变量文件
+    - ".env"
+    - ".env.example"
+
+  # 排除的提交信息（正则表达式）
+  exclude_messages:
+    - "^\\[bot\\]"
+    - "^Auto merge"
+    - "^chore\\(deps\\)"
+    - "^Merge branch"
+    - "^Merge remote"
+
+    # 回滚、初始提交、版本发布
+    - "^Revert"
+    - "^Initial commit"
+    - "^Version \\d+"
+    - "^v\\d+\\.\\d+"
+
+    # CI 跳过标记
+    - "^\\[skip ci\\]"
+    - "^\\[ci skip\\]"
+
+    # 过于宽泛，按需启用
+    - "^Update"
+    - "^Fix"
+
+projects:
+  # 要监控的项目列表（可在Web界面配置）
+  # - id: 1          # GitLab项目ID
+  #   name: "项目名"
+  #   enabled: true
+  - id: 1          # GitLab项目ID
+    name: "CRM"
+    enabled: true
